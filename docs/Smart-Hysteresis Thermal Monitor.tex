@@ -1,0 +1,107 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx} % Per le immagini
+\usepackage{listings} % Per il codice C++
+\usepackage{xcolor}   % Per i colori del codice
+\usepackage{hyperref} % Per i link cliccabili
+\usepackage{amsmath}  % Per le formule matematiche
+
+% --- CODE STYLE CONFIGURATION ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstset{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C++
+}
+
+% --- DOCUMENT INFO ---
+\title{\textbf{Technical Report: Smart-Hysteresis Thermal Monitor}}
+\author{Alessio Nuzzolese}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This report documents the development of a temperature control system based on the \textbf{Arduino Uno} platform. The system is designed to provide real-time thermal monitoring with an integrated safety alarm governed by hysteresis logic to ensure signal stability.
+
+\section{System Architecture}
+The project was prototyped using the \textit{Autodesk Tinkercad} environment. The hardware components, all included in the \textbf{Elegoo Super Starter Kit}, are:
+\begin{itemize}
+    \item \textbf{Microcontroller:} Arduino Uno R3.
+    \item \textbf{Sensing:} TMP36 Precision Analog Temperature Sensor.
+    \item \textbf{Display:} I2C 16x2 Liquid Crystal Display (LCD).
+    \item \textbf{Indicators:} Red LED and Passive Piezoelectric Buzzer.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+  
+    \includegraphics[width=0.8\textwidth]{Thermometer.png} 
+    \caption{TinkerCad circuit view.}
+    \label{fig:circuit}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+  
+    \includegraphics[width=0.8\textwidth]{Thermometer2.png} 
+    \caption{TinkerCad wiring schematic view.}
+    \label{fig:circuit}
+\end{figure}
+
+
+\section{Mathematical Modeling}
+\subsection{Analog-to-Digital Conversion}
+The Arduino ADC converts the analog voltage from the TMP36 sensor into a 10-bit digital value ($0-1023$). The conversion to Celsius degrees follows the transfer function:
+\begin{equation}
+    T (^\circ C) = \left( \frac{ADC_{raw} \cdot 5.0}{1024} - 0.5 \right) \cdot 100
+\end{equation}
+This formula accounts for the $500mV$ offset at $0^\circ C$ and the $10mV/^\circ C$ scale factor typical of the TMP36 sensor.
+
+\subsection{Hysteresis Logic}
+To prevent "chattering" (rapid switching of the alarm due to noise), a \textbf{Schmitt Trigger} approach was implemented with two distinct thresholds:
+\begin{itemize}
+    \item \textbf{Activation ($S_{on}$):} $30.0^\circ C$
+    \item \textbf{Deactivation ($S_{off}$):} $28.0^\circ C$
+\end{itemize}
+
+\section{Implementation}
+The control firmware was written in C++. Below is the implementation of the hysteresis logic:
+
+\begin{lstlisting}
+// --- HYSTERESIS LOGIC ---
+if (temperatureC >= activation) {
+    alarmOn = true;  // Trigger alarm
+} else if (temperatureC <= deactivation) {
+    alarmOn = false; // Reset alarm
+}
+\end{lstlisting}
+
+\section{Conclusion}
+The simulation successfully demonstrated that the hysteresis logic provides a stable control signal, effectively filtering out minor temperature fluctuations. This project serves as a foundational example of industrial sensor interfacing and robust software design.
+This project has real application in every engineering field.
+
+\end{document}
